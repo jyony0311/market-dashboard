@@ -873,6 +873,124 @@ def generate_ai_consulting(r):
 
 
 # =========================
+# 마케팅 채널별 활용 전략
+# =========================
+def generate_marketing_playbook(r):
+    selected = r.get("marketing_channels", [])
+    playbook = []
+
+    channel_templates = {
+        "네이버 플레이스": {
+            "goal": "검색 유입과 방문 전환 강화",
+            "action": "대표 사진 5장 이상 정리, 영업시간·메뉴·가격 최신화, 방문 후 리뷰 요청 문구 준비",
+            "content": "메뉴 사진, 매장 외관, 위치 안내, 대표 메뉴 소개, 리뷰 답변",
+            "metric": "저장 수, 길찾기 클릭, 전화/예약 클릭, 리뷰 수"
+        },
+        "인스타그램": {
+            "goal": "브랜드 이미지와 신규 고객 관심 유도",
+            "action": "릴스/스토리 중심으로 주 2회 업로드, 대표 메뉴 제작 과정이나 고객 반응을 짧게 노출",
+            "content": "릴스, 메뉴 비주얼, 비하인드, 이벤트 안내, 고객 후기 리그램",
+            "metric": "조회 수, 저장 수, 프로필 방문, DM 문의"
+        },
+        "블로그": {
+            "goal": "검색 기반 신뢰도와 상세 정보 제공",
+            "action": "월 2회 이상 지역명+업종 키워드로 후기형 글 작성 또는 체험 후기 확보",
+            "content": "매장 소개, 대표 메뉴 리뷰, 가격 정보, 이용 방법, 지역 키워드 후기",
+            "metric": "검색 노출, 유입 수, 체류 시간, 예약/문의 전환"
+        },
+        "카카오채널": {
+            "goal": "단골 고객 재방문 유도",
+            "action": "친구 추가 QR을 매장에 배치하고, 신메뉴·쿠폰·휴무 공지를 월 2회 발송",
+            "content": "쿠폰, 신메뉴 소식, 재방문 혜택, 예약 안내, 단골 전용 이벤트",
+            "metric": "친구 수, 메시지 클릭률, 쿠폰 사용률, 재방문 고객 수"
+        },
+        "배달앱/예약앱": {
+            "goal": "즉시 구매와 예약 전환 강화",
+            "action": "메뉴 사진, 옵션 구성, 리뷰 답변, 시간대별 할인 쿠폰을 정리해 전환율 개선",
+            "content": "대표 메뉴 구성, 세트 메뉴, 리뷰 이벤트, 시간대 쿠폰, 예약 안내",
+            "metric": "주문/예약 수, 전환율, 리뷰 평점, 재주문율"
+        },
+        "지역 커뮤니티": {
+            "goal": "동네 기반 신뢰와 입소문 확보",
+            "action": "지역 카페·동네 커뮤니티에 홍보성보다 정보성 게시글과 이벤트를 운영",
+            "content": "동네 행사, 할인 안내, 지역 주민 혜택, 사장님 스토리, 후기 공유",
+            "metric": "댓글 수, 문의 수, 쿠폰 사용률, 신규 방문자 수"
+        },
+        "오프라인 홍보": {
+            "goal": "매장 내 재방문과 현장 전환 강화",
+            "action": "스탬프 카드, 테이블 QR, 입구 안내물, 포장 쿠폰을 통해 방문 고객을 재방문 고객으로 전환",
+            "content": "QR 안내문, 스탬프 카드, 영수증 쿠폰, 테이블 메뉴판, 재방문 혜택",
+            "metric": "쿠폰 회수율, QR 접속 수, 재방문 고객 수, 객단가"
+        }
+    }
+
+    if not selected:
+        selected = ["네이버 플레이스", "인스타그램", "오프라인 홍보"]
+
+    for ch in selected:
+        if ch in channel_templates:
+            item = channel_templates[ch].copy()
+            item["channel"] = ch
+            playbook.append(item)
+
+    # 부족한 채널 추천
+    recommendations = []
+    if "네이버 플레이스" not in selected:
+        recommendations.append("네이버 플레이스는 검색 유입의 기본 채널이므로 우선 추가하는 것이 좋습니다.")
+    if r["revisit_rate"] < 50 and "카카오채널" not in selected:
+        recommendations.append("재방문율 개선을 위해 카카오채널 또는 쿠폰 기반 CRM 채널을 추가하는 것이 좋습니다.")
+    if r["marketing_score"] < 60 and "인스타그램" not in selected:
+        recommendations.append("브랜드 노출 강화를 위해 인스타그램 릴스/스토리 운영을 추가하는 것이 좋습니다.")
+
+    return playbook, recommendations
+
+
+def generate_advanced_roadmap(r):
+    playbook, recommendations = generate_marketing_playbook(r)
+    main_channel = playbook[0]["channel"] if playbook else "네이버 플레이스"
+
+    week_tasks = [
+        "현재 지표 기준값 저장: 매출, 총비용, 재방문율, 마케팅 활용도 기록",
+        "네이버 플레이스·인스타그램·리뷰 상태를 점검하고 누락 정보 정리",
+        f"핵심 채널 1순위 선정: {main_channel} 중심으로 운영 시작"
+    ]
+
+    month_tasks = [
+        "주 2회 콘텐츠 업로드 루틴 운영: 대표 메뉴, 후기, 이벤트, 매장 분위기 콘텐츠 제작",
+        "리뷰 요청 문구와 답변 템플릿을 만들고 신규 리뷰에 48시간 안에 답변",
+        "재방문 쿠폰 또는 스탬프 혜택을 실제 운영하여 재방문 고객 수 측정"
+    ]
+
+    quarter_tasks = [
+        "채널별 성과 비교: 조회 수, 저장 수, 리뷰 수, 쿠폰 사용률, 재방문율 확인",
+        "성과가 낮은 채널은 운영 빈도를 줄이고 성과가 높은 채널에 콘텐츠 집중",
+        "월별 리포트를 저장하여 매출·비용·고객 지표 변화 추세를 비교"
+    ]
+
+    if r["revisit_rate"] < 50:
+        week_tasks.append("재방문 고객 판별 기준을 정하고 계산 방식을 통일")
+        month_tasks.append("2회 방문 고객 대상 혜택을 만들어 단골 전환 실험")
+        quarter_tasks.append("재방문율 목표를 현재 대비 10%p 개선으로 설정하고 결과 비교")
+
+    if r["marketing_score"] < 60:
+        week_tasks.append("프로필 사진, 대표 메뉴 사진, 가격 정보 등 기본 노출 요소 보완")
+        month_tasks.append("리뷰 이벤트와 SNS 공유 이벤트를 동시에 운영")
+        quarter_tasks.append("마케팅 채널별 유입 효과를 비교해 핵심 채널 2개만 집중 운영")
+
+    if r["cost_ratio"] > 75:
+        week_tasks.append("마케팅 실행 전 예산 한도를 정해 비용 증가를 방지")
+        month_tasks.append("무료·저비용 채널 중심으로 홍보하고 광고비 지출은 제한")
+        quarter_tasks.append("마케팅 비용 대비 매출 증가분을 비교해 ROI 기준 설정")
+
+    return {
+        "week": week_tasks,
+        "month": month_tasks,
+        "quarter": quarter_tasks,
+        "recommendations": recommendations
+    }
+
+
+# =========================
 # 사이드바
 # =========================
 DEFAULT_VALUES = {
@@ -1207,33 +1325,54 @@ else:
             </div>
             """, unsafe_allow_html=True)
 
-        st.subheader("기간별 실행 로드맵")
+        st.subheader("마케팅 채널별 활용 전략")
+        playbook, marketing_recommendations = generate_marketing_playbook(r)
+
+        for item in playbook:
+            st.markdown(f"""
+            <div class="comparison-card">
+                <div class="comparison-title">📌 {item['channel']} · {item['goal']}</div>
+                <div class="comparison-row"><span>실행 방법</span><b>{item['action']}</b></div>
+                <div class="comparison-row"><span>추천 콘텐츠</span><b>{item['content']}</b></div>
+                <div class="comparison-row"><span>확인 지표</span><b>{item['metric']}</b></div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        if marketing_recommendations:
+            st.subheader("추가 추천 채널")
+            for rec in marketing_recommendations:
+                st.markdown(f"""
+                <div class="problem-card">💡 {rec}</div>
+                """, unsafe_allow_html=True)
+
+        st.subheader("고급 실행 로드맵")
+        advanced_roadmap = generate_advanced_roadmap(r)
         roadmap_col1, roadmap_col2, roadmap_col3 = st.columns(3)
 
         with roadmap_col1:
             st.markdown("""
             <div class="comparison-card">
-                <div class="comparison-title">이번 주</div>
+                <div class="comparison-title">1단계 · 이번 주 세팅</div>
             """, unsafe_allow_html=True)
-            for item in consulting["one_week"]:
+            for item in advanced_roadmap["week"]:
                 st.markdown(f"- {item}")
             st.markdown("</div>", unsafe_allow_html=True)
 
         with roadmap_col2:
             st.markdown("""
             <div class="comparison-card">
-                <div class="comparison-title">1개월 내</div>
+                <div class="comparison-title">2단계 · 1개월 실행</div>
             """, unsafe_allow_html=True)
-            for item in consulting["one_month"]:
+            for item in advanced_roadmap["month"]:
                 st.markdown(f"- {item}")
             st.markdown("</div>", unsafe_allow_html=True)
 
         with roadmap_col3:
             st.markdown("""
             <div class="comparison-card">
-                <div class="comparison-title">3개월 내</div>
+                <div class="comparison-title">3단계 · 3개월 최적화</div>
             """, unsafe_allow_html=True)
-            for item in consulting["three_month"]:
+            for item in advanced_roadmap["quarter"]:
                 st.markdown(f"- {item}")
             st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1363,33 +1502,46 @@ else:
             """, unsafe_allow_html=True)
 
         st.subheader("실행 로드맵")
+        advanced_roadmap = generate_advanced_roadmap(r)
         road1, road2, road3 = st.columns(3)
         with road1:
             st.markdown("""
             <div class="comparison-card">
-                <div class="comparison-title">이번 주</div>
+                <div class="comparison-title">1단계 · 이번 주 세팅</div>
             """, unsafe_allow_html=True)
-            for item in consulting["one_week"]:
+            for item in advanced_roadmap["week"]:
                 st.markdown(f"- {item}")
             st.markdown("</div>", unsafe_allow_html=True)
 
         with road2:
             st.markdown("""
             <div class="comparison-card">
-                <div class="comparison-title">1개월 내</div>
+                <div class="comparison-title">2단계 · 1개월 실행</div>
             """, unsafe_allow_html=True)
-            for item in consulting["one_month"]:
+            for item in advanced_roadmap["month"]:
                 st.markdown(f"- {item}")
             st.markdown("</div>", unsafe_allow_html=True)
 
         with road3:
             st.markdown("""
             <div class="comparison-card">
-                <div class="comparison-title">3개월 내</div>
+                <div class="comparison-title">3단계 · 3개월 최적화</div>
             """, unsafe_allow_html=True)
-            for item in consulting["three_month"]:
+            for item in advanced_roadmap["quarter"]:
                 st.markdown(f"- {item}")
             st.markdown("</div>", unsafe_allow_html=True)
+
+        st.subheader("마케팅 채널별 활용 전략")
+        playbook, marketing_recommendations = generate_marketing_playbook(r)
+        for item in playbook:
+            st.markdown(f"""
+            <div class="comparison-card">
+                <div class="comparison-title">📌 {item['channel']} · {item['goal']}</div>
+                <div class="comparison-row"><span>실행 방법</span><b>{item['action']}</b></div>
+                <div class="comparison-row"><span>추천 콘텐츠</span><b>{item['content']}</b></div>
+                <div class="comparison-row"><span>확인 지표</span><b>{item['metric']}</b></div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with st.expander("텍스트 리포트 원문 보기"):
             st.text_area("리포트 원문", report_text, height=360)
