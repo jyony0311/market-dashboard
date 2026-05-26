@@ -873,6 +873,181 @@ def generate_ai_consulting(r):
 
 
 # =========================
+# 핵심 문제 영역 상세 진단
+# =========================
+def issue_level(score):
+    if score >= 85:
+        return "우수", "✅"
+    elif score >= 70:
+        return "양호", "🟢"
+    elif score >= 55:
+        return "주의", "🟡"
+    else:
+        return "위험", "🔴"
+
+
+def generate_issue_cards(r):
+    issues = []
+
+    # 수익성
+    level, icon = issue_level(r["profitability"])
+    if r["margin"] < 10:
+        diagnosis = "순이익이 낮아 매출이 발생해도 실제 남는 금액이 부족합니다."
+        action = "객단가 상승, 저마진 메뉴 축소, 세트 구성 개선이 우선입니다."
+    elif r["margin"] < 20:
+        diagnosis = "수익성은 보통 수준이지만 비용 증가에 취약한 구조입니다."
+        action = "할인 이벤트를 줄이고 고마진 상품 비중을 늘리는 것이 좋습니다."
+    else:
+        diagnosis = "수익성은 비교적 안정적입니다. 현재 이익 구조를 유지하면서 성장 전략을 병행할 수 있습니다."
+        action = "고객 유지와 마케팅 효율을 높여 매출 확대에 집중합니다."
+    issues.append({
+        "name": "수익성",
+        "score": r["profitability"],
+        "level": level,
+        "icon": icon,
+        "value": f"수익률 {r['margin']:.1f}%",
+        "basis": f"순이익 {r['profit']:,}만원 = 월 매출 {r['sales']:,}만원 - 월 총비용 {r['total_cost']:,}만원",
+        "diagnosis": diagnosis,
+        "action": action
+    })
+
+    # 비용 효율성
+    level, icon = issue_level(r["cost_efficiency"])
+    if r["cost_ratio"] > 80:
+        diagnosis = "월 총비용이 매출 대비 매우 높아 순이익을 압박하고 있습니다."
+        action = "기타 운영비, 임대료, 인건비 중 가장 큰 항목부터 절감 가능성을 점검합니다."
+    elif r["cost_ratio"] > 70:
+        diagnosis = "비용 비율이 다소 높아 매출 증가가 곧바로 이익 증가로 이어지기 어렵습니다."
+        action = "월별 비용 항목을 고정비와 변동비로 나누고 5~10% 절감 목표를 설정합니다."
+    else:
+        diagnosis = "비용 구조는 비교적 안정적입니다. 급격한 비용 증가 여부를 계속 관찰하면 됩니다."
+        action = "현재 비용 구조를 기준값으로 저장하고 월별 변화를 관리합니다."
+    issues.append({
+        "name": "비용효율성",
+        "score": r["cost_efficiency"],
+        "level": level,
+        "icon": icon,
+        "value": f"총비용 비율 {r['cost_ratio']:.1f}%",
+        "basis": f"총비용 {r['total_cost']:,}만원 = 기타 운영비 {r['other_cost']:,}만원 + 임대료 {r['rent']:,}만원 + 인건비 {r['labor_cost']:,}만원",
+        "diagnosis": diagnosis,
+        "action": action
+    })
+
+    # 인건비
+    level, icon = issue_level(r["labor_efficiency"])
+    if r["labor_ratio"] > 45:
+        diagnosis = "인건비 부담이 커서 인력 운영 효율 개선이 필요합니다."
+        action = "피크타임 중심 근무 배치, 반복 업무 단축, 업무별 역할 분담을 점검합니다."
+    elif r["labor_ratio"] > 35:
+        diagnosis = "인건비율은 주의 구간입니다. 인력을 줄이기보다 배치 효율을 먼저 확인해야 합니다."
+        action = "요일·시간대별 방문자 수를 기준으로 근무표를 조정합니다."
+    else:
+        diagnosis = "인건비율은 비교적 안정적입니다. 현재 운영 방식을 유지해도 무리가 적습니다."
+        action = "서비스 품질을 유지하면서 바쁜 시간대 대응력을 높입니다."
+    issues.append({
+        "name": "인건비효율",
+        "score": r["labor_efficiency"],
+        "level": level,
+        "icon": icon,
+        "value": f"인건비율 {r['labor_ratio']:.1f}%",
+        "basis": f"월 인건비 {r['labor_cost']:,}만원 / 월 매출 {r['sales']:,}만원, 직원 수 {r['staff']}명",
+        "diagnosis": diagnosis,
+        "action": action
+    })
+
+    # 임대료
+    level, icon = issue_level(r["rent_stability"])
+    if r["rent_ratio"] > 20:
+        diagnosis = "임대료 부담이 높아 고정비 안정성이 낮습니다."
+        action = "공간 회전율, 예약 운영, 비는 시간대 매출 전략을 강화합니다."
+    elif r["rent_ratio"] > 15:
+        diagnosis = "임대료율은 다소 부담이 있는 구간입니다. 매출이 줄면 고정비 부담이 커질 수 있습니다."
+        action = "평일 비수기 프로모션과 단골 고객 재방문 전략으로 안정 매출을 확보합니다."
+    else:
+        diagnosis = "임대료율은 안정적입니다. 고정비 부담보다 고객 확보와 매출 확대에 집중할 수 있습니다."
+        action = "현재 공간을 활용해 객단가와 방문 빈도를 높이는 전략을 운영합니다."
+    issues.append({
+        "name": "임대료안정성",
+        "score": r["rent_stability"],
+        "level": level,
+        "icon": icon,
+        "value": f"임대료율 {r['rent_ratio']:.1f}%",
+        "basis": f"월 임대료 {r['rent']:,}만원 / 월 매출 {r['sales']:,}만원",
+        "diagnosis": diagnosis,
+        "action": action
+    })
+
+    # 재방문율
+    level, icon = issue_level(r["customer_score"])
+    if r["revisit_rate"] < 30:
+        diagnosis = "재방문율이 낮아 신규 고객 유입에 의존하는 구조일 가능성이 큽니다."
+        action = "스탬프 쿠폰, 2회 방문 혜택, 단골 고객 기록을 우선 도입합니다."
+    elif r["revisit_rate"] < 50:
+        diagnosis = "재방문율은 개선 여지가 있습니다. 다시 방문할 이유를 더 명확히 만들어야 합니다."
+        action = "후기 쿠폰, 시즌 메뉴, 멤버십 혜택으로 재방문 동기를 강화합니다."
+    else:
+        diagnosis = "재방문율은 양호합니다. 기존 고객 기반을 활용한 추천 전략이 가능합니다."
+        action = "단골 고객 추천 혜택과 리뷰 이벤트를 통해 신규 고객으로 확장합니다."
+    issues.append({
+        "name": "고객관리",
+        "score": r["customer_score"],
+        "level": level,
+        "icon": icon,
+        "value": f"재방문율 {r['revisit_rate']}%",
+        "basis": f"일 재방문 고객 {r['repeat_customers']}명 / 일 방문자 {r['customers']}명",
+        "diagnosis": diagnosis,
+        "action": action
+    })
+
+    # 마케팅
+    level, icon = issue_level(r["marketing"])
+    channels_text = ", ".join(r["marketing_channels"]) if r["marketing_channels"] else "활용 채널 없음"
+    if r["marketing_score"] < 50:
+        diagnosis = "마케팅 활용도가 낮아 신규 고객 유입 기회가 부족할 수 있습니다."
+        action = "네이버 플레이스 기본 정보 정리, 인스타그램 주 2회 게시, 리뷰 답변 루틴을 시작합니다."
+    elif r["marketing_score"] < 75:
+        diagnosis = "마케팅은 운영 중이지만 채널별 역할과 성과 관리가 더 필요합니다."
+        action = "채널별 목표를 나누고 저장 수, 리뷰 수, 문의 수 같은 성과 지표를 관리합니다."
+    else:
+        diagnosis = "마케팅 활용도는 양호합니다. 이제는 성과가 좋은 채널에 집중할 단계입니다."
+        action = "조회 수보다 저장, 문의, 예약, 재방문으로 이어지는 채널에 집중합니다."
+    issues.append({
+        "name": "마케팅",
+        "score": r["marketing"],
+        "level": level,
+        "icon": icon,
+        "value": f"마케팅 활용도 {r['marketing_score']}점",
+        "basis": f"활용 채널: {channels_text} / 업데이트: {r['posting_frequency']} / 리뷰 관리: {r['review_management']}",
+        "diagnosis": diagnosis,
+        "action": action
+    })
+
+    # 성장성
+    level, icon = issue_level(r["growth"])
+    if r["growth"] < 50:
+        diagnosis = "고객 유지와 마케팅 지표가 함께 낮아 성장 동력이 부족합니다."
+        action = "재방문 혜택과 온라인 노출 개선을 동시에 진행해야 합니다."
+    elif r["growth"] < 70:
+        diagnosis = "성장성은 보통 수준입니다. 고객 유지와 신규 유입 중 약한 부분을 보완하면 개선 가능합니다."
+        action = "재방문율과 마케팅 점수를 월별로 비교하면서 성장 실험을 운영합니다."
+    else:
+        diagnosis = "성장성은 양호합니다. 현재 고객 기반과 채널 운영을 확장 전략으로 연결할 수 있습니다."
+        action = "추천 이벤트, 신메뉴 캠페인, 단골 대상 프로모션으로 확장합니다."
+    issues.append({
+        "name": "성장성",
+        "score": r["growth"],
+        "level": level,
+        "icon": icon,
+        "value": f"성장성 점수 {r['growth']}점",
+        "basis": f"재방문율 {r['revisit_rate']}%와 마케팅 활용도 {r['marketing_score']}점을 종합 반영",
+        "diagnosis": diagnosis,
+        "action": action
+    })
+
+    return sorted(issues, key=lambda x: x["score"])
+
+
+# =========================
 # 마케팅 채널별 활용 전략
 # =========================
 def generate_marketing_playbook(r):
@@ -1277,21 +1452,40 @@ else:
 
         with right:
             st.subheader("핵심 문제 영역")
-
-            for p in r["problems"]:
-                if "안정적" in p:
-                    st.markdown(f'<div class="success-card">✅ {p}</div>', unsafe_allow_html=True)
-                else:
-                    st.markdown(f'<div class="problem-card">⚠️ {p}</div>', unsafe_allow_html=True)
+            issue_cards = generate_issue_cards(r)
 
             st.markdown(f"""
-            <div style="margin-top: 18px;">
-                <span class="grade-badge">{r['grade']} 등급</span>
+            <div style="margin-bottom: 14px;">
+                <span class="grade-badge">{r['grade']} 등급 · {r['total_score']}점</span>
                 <div style="font-size: 14px; color: #64748B; font-weight: 750; margin-top: 10px;">
-                    {r['grade_comment']}
+                    낮은 점수 순으로 우선 점검할 지표를 보여줍니다.
                 </div>
             </div>
             """, unsafe_allow_html=True)
+
+            for item in issue_cards[:5]:
+                st.markdown(f"""
+                <div class="comparison-card">
+                    <div class="comparison-title">{item['icon']} {item['name']} · {item['level']} · {item['score']}점</div>
+                    <div class="comparison-row"><span>현재값</span><b>{item['value']}</b></div>
+                    <div class="comparison-row"><span>근거</span><b>{item['basis']}</b></div>
+                    <div style="font-size:14px; color:#334155; font-weight:750; line-height:1.6; margin-top:12px;">
+                        {item['diagnosis']}
+                    </div>
+                    <div style="font-size:13px; color:#4F46E5; font-weight:800; line-height:1.6; margin-top:10px;">
+                        제안: {item['action']}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            with st.expander("전체 7대 지표 상세 보기"):
+                for item in issue_cards:
+                    st.markdown(f"**{item['icon']} {item['name']} · {item['level']} · {item['score']}점**")
+                    st.write(f"현재값: {item['value']}")
+                    st.write(f"근거: {item['basis']}")
+                    st.write(f"진단: {item['diagnosis']}")
+                    st.write(f"제안: {item['action']}")
+                    st.divider()
 
     with tab2:
         st.markdown('<div class="section-title">AI 경영 컨설팅</div>', unsafe_allow_html=True)
@@ -1489,6 +1683,19 @@ else:
                 <div class="comparison-row"><span>마케팅 채널</span><b>{channels_text}</b></div>
                 <div class="comparison-row"><span>업데이트 빈도</span><b>{r['posting_frequency']}</b></div>
                 <div class="comparison-row"><span>마케팅 점수</span><b>{r['marketing_score']}점</b></div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.subheader("핵심 문제 상세 요약")
+        issue_cards = generate_issue_cards(r)
+        for item in issue_cards[:3]:
+            st.markdown(f"""
+            <div class="comparison-card">
+                <div class="comparison-title">{item['icon']} {item['name']} · {item['level']} · {item['score']}점</div>
+                <div class="comparison-row"><span>현재값</span><b>{item['value']}</b></div>
+                <div class="comparison-row"><span>판단 근거</span><b>{item['basis']}</b></div>
+                <div style="font-size:14px; color:#334155; font-weight:750; line-height:1.6; margin-top:12px;">{item['diagnosis']}</div>
+                <div style="font-size:13px; color:#4F46E5; font-weight:800; line-height:1.6; margin-top:10px;">제안: {item['action']}</div>
             </div>
             """, unsafe_allow_html=True)
 
